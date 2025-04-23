@@ -6,17 +6,14 @@ import { useGetInstructorCoursesQuery } from "../../../redux/slices/course/cours
 import { useInstructorDetailsQuery } from "../../../redux/slices/instructor/instructorApiSlice";
 import Footer from "../../footer";
 import RoleBasedHeader from "../../header/RoleBasedHeader";
-import {
-  CoursesIcon,
-  Icon1,
-  Icon2,
-  TtlStudIcon,
-} from "../../imagepath";
+import { CoursesIcon, Icon1, Icon2, TtlStudIcon } from "../../imagepath";
 import { useSelector } from "react-redux";
 import { selectCurrentRoles } from "../../../redux/slices/auth/authSlice";
 
 export default function InstructorProfile() {
   const roles = useSelector(selectCurrentRoles);
+  const storedInstructorId = localStorage.getItem("instructorId");
+  const isInstructor = storedInstructorId && storedInstructorId !== "null";
   const formatCurrency = useCurrencyFormatter();
   const { instructorId } = useParams();
   const {
@@ -284,16 +281,21 @@ export default function InstructorProfile() {
                                   </div>
                                   <div className="course-view d-flex align-items-center">
                                     <img src={Icon2} alt="" />
-                                    <p>{course.duration} {course.duration === 1 ? "hr" : "hrs"}</p>
+                                    <p>
+                                      {course.duration}{" "}
+                                      {course.duration === 1 ? "hr" : "hrs"}
+                                    </p>
                                   </div>
                                 </div>
                                 <div className="all-btn all-category d-flex align-items-center">
-                                  <Link
-                                    to={`/checkout/${course.id}`}
-                                    className="btn btn-primary"
-                                  >
-                                    BUY NOW
-                                  </Link>
+                                  {!isInstructor && (
+                                    <Link
+                                      to={`/checkout/${course.id}`}
+                                      className="btn btn-primary"
+                                    >
+                                      BUY NOW
+                                    </Link>
+                                  )}
                                 </div>
                               </div>
                             </div>

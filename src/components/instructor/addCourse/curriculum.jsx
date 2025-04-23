@@ -258,7 +258,7 @@ const Curriculum = ({ nextTab3, prevTab2, isEditing }) => {
       chunk: async (result, parser) => {
         parser.pause(); // Tạm dừng đọc file
 
-        await processCSVChunk(result.data); // Xử lý từng phần dữ liệu
+        await processCSVChunk(result.data, sections); // Truyền sections vào hàm
 
         parser.resume(); // Tiếp tục đọc phần tiếp theo
       },
@@ -266,78 +266,76 @@ const Curriculum = ({ nextTab3, prevTab2, isEditing }) => {
         console.log("CSV Import Completed!");
       },
     });
-  };
+};
 
-  const processCSVChunk = async (dataChunk) => {
+
+  const processCSVChunk = async (dataChunk, currentSections) => {
     return new Promise((resolve) => {
-      const structuredData = {};
+        const structuredData = new Map(); // Dùng Map để tránh trùng lặp
 
-      dataChunk.forEach((row) => {
-        const {
-          "Section ID": sectionId,
-          Section,
-          "Lecture ID": lectureId,
-          Lecture,
-          "Video URL": videoUrl,
-          "Article ID": articleId,
-          "Article File": articleFile,
-          "Article Content": articleContent,
-        } = row;
+        dataChunk.forEach((row) => {
+            const sectionTitle = row["Section"]?.trim();
+            const lectureTitle = row["Lecture"]?.trim();
+            const videoUrl = row["Video URL"]?.trim();
+            const articleFile = row["Article File"]?.trim();
+            const articleContent = row["Article Content"]?.trim();
 
-        if (!structuredData[Section]) {
-          structuredData[Section] = {
-            id: sectionId ? Number(sectionId) : null, // Lưu ID nếu có
-            title: Section,
-            lectures: [],
-          };
-        }
+            if (!sectionTitle) return; // Bỏ qua nếu không có tiêu đề Section
 
-        const lectureIndex = structuredData[Section].lectures.findIndex(
-          (l) => l.title === Lecture
-        );
+            if (!structuredData.has(sectionTitle)) {
+                structuredData.set(sectionTitle, {
+                    title: sectionTitle,
+                    lectures: [],
+                });
+            }
 
-        if (lectureIndex === -1) {
-          structuredData[Section].lectures.push({
-            id: lectureId ? Number(lectureId) : null,
-            title: Lecture,
-            lectureVideo: videoUrl || "",
-            articles: articleFile
-              ? [
-                  {
-                    id: articleId ? Number(articleId) : null,
+            const section = structuredData.get(sectionTitle);
+            let lecture = section.lectures.find(l => l.title === lectureTitle);
+
+            if (!lecture && lectureTitle) {
+                lecture = {
+                    title: lectureTitle,
+                    lectureVideo: videoUrl || "",
+                    articles: [],
+                };
+                section.lectures.push(lecture);
+            }
+
+            if (articleFile) {
+                lecture.articles.push({
                     name: articleFile,
                     fileUrl: articleFile,
                     content: articleContent || "",
-                  },
-                ]
-              : [],
-          });
-        } else {
-          if (articleFile) {
-            structuredData[Section].lectures[lectureIndex].articles.push({
-              id: articleId ? Number(articleId) : null,
-              name: articleFile,
-              fileUrl: articleFile,
-              content: articleContent || "",
-            });
-          }
-        }
-      });
+                });
+            }
+        });
 
-      // Dispatch từng phần để tránh lag UI
-      Object.values(structuredData).forEach((section) => {
-        dispatch(
-          addSection({
-            id: section.id,
-            title: section.title,
-            lectures: section.lectures,
-          })
-        );
-      });
+        structuredData.forEach((section) => {
+            const existingSection = currentSections.find(s => s.title === section.title);
+            
+            if (existingSection) {
+                // Nếu Section đã tồn tại, cập nhật lectures
+                section.lectures.forEach(lecture => {
+                    const existingLecture = existingSection.lectures.find(l => l.title === lecture.title);
+                    if (!existingLecture) {
+                        existingSection.lectures.push(lecture);
+                    }
+                });
+                dispatch(updateSection(existingSection));
+            } else {
+                // Nếu Section chưa có, thêm mới
+                dispatch(addSection(section));
+            }
+        });
 
-      resolve();
+        resolve();
     });
-  };
+};
+
+
+
+
+
 
   const handleExportCSV = () => {
     if (sections.length === 0) {

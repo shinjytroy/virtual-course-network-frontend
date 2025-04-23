@@ -137,7 +137,7 @@ const TestQuestion = ({ nextTab4, prevTab3, isEditing }) => {
   const processCSVChunk = (dataChunk) => {
     return new Promise((resolve) => {
       const structuredData = [];
-
+  
       dataChunk.forEach((row) => {
         const {
           "Question Title": questionTitle,
@@ -147,11 +147,10 @@ const TestQuestion = ({ nextTab4, prevTab3, isEditing }) => {
           "Answer Option 3": answerOption3,
           "Answer Option 4": answerOption4,
           "Answer Option 5": answerOption5,
-          "Correct Answer": correctAnswer,
         } = row;
-
+  
         if (!questionTitle || !mark) return;
-
+  
         const answerOptions = [
           answerOption1,
           answerOption2,
@@ -161,49 +160,48 @@ const TestQuestion = ({ nextTab4, prevTab3, isEditing }) => {
         ]
           .filter(Boolean)
           .map((option) => ({
-            title: option,
-            isCorrect: option === correctAnswer,
+            title: option.replace(" (correct)", ""), // Loại bỏ "(correct)" khỏi tiêu đề
+            isCorrect: option.toLowerCase().includes("correct"),
           }));
-
+  
         structuredData.push({
           title: questionTitle,
           mark: parseInt(mark, 10) || 0,
           answerOptions,
         });
       });
-
+  
       if (structuredData.length === 0) {
         alert("No valid questions found in CSV.");
         return;
       }
-
+  
       dispatch(setQuestionInfo({ questions: structuredData })); 
       alert("CSV Import Completed!");
       resolve();
     });
   };
 
+
   const handleDownloadSampleCSV = () => {
     const sampleData = [
       {
         "Question Title": "What is Java?",
         "Mark": "10",
-        "Answer Option 1": "A programming language",
+        "Answer Option 1": "A programming language (correct)",
         "Answer Option 2": "A fruit",
         "Answer Option 3": "A coffee",
         "Answer Option 4": "",
         "Answer Option 5": "",
-        "Correct Answer": "A programming language",
       },
       {
         "Question Title": "Which of these are programming languages?",
         "Mark": "8",
-        "Answer Option 1": "Java",
-        "Answer Option 2": "Python",
+        "Answer Option 1": "Java (correct)",
+        "Answer Option 2": "Python (correct)",
         "Answer Option 3": "HTML",
         "Answer Option 4": "CSS",
         "Answer Option 5": "",
-        "Correct Answer": "Java",
       },
     ];
   
@@ -216,8 +214,8 @@ const TestQuestion = ({ nextTab4, prevTab3, isEditing }) => {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-  };  
-
+  };
+  
   const handleExportCSV = () => {
     if (questions.length === 0) {
       alert("No questions available to export.");

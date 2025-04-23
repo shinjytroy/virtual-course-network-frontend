@@ -41,6 +41,8 @@ const DetailsContent = ({ courseDetails }) => {
     () => localStorage.getItem("studentId") || ""
   );
   const formatCurrency = useCurrencyFormatter();
+  const storedInstructorId = localStorage.getItem("instructorId");
+  const isInstructor = storedInstructorId && storedInstructorId !== "null";
 
   // Derived states
   const instructorIdNumber = Number(courseDetails.instructorId);
@@ -189,7 +191,8 @@ const DetailsContent = ({ courseDetails }) => {
                 <div className="card-body">
                   <h5 className="subs-title">Overview</h5>
                   <h6>Course Description</h6>
-                  <p style={{ textAlign: "justify" }}
+                  <p
+                    style={{ textAlign: "justify" }}
                     dangerouslySetInnerHTML={{
                       __html: sanitizedCourseDescription,
                     }}
@@ -344,7 +347,10 @@ const DetailsContent = ({ courseDetails }) => {
                     </div>
                     <div className="cou-info">
                       <img src={Icon2} alt="" />
-                      <p>{courseDetails.duration} {courseDetails.duration === 1 ? "hr" : "hrs"}</p>
+                      <p>
+                        {courseDetails.duration}{" "}
+                        {courseDetails.duration === 1 ? "hr" : "hrs"}
+                      </p>
                     </div>
                     <div className="cou-info">
                       <img src={People} alt="" />
@@ -352,7 +358,8 @@ const DetailsContent = ({ courseDetails }) => {
                     </div>
                   </div>
                   <p>{instructorDetails.title}</p>
-                  <div style={{ textAlign: "justify" }}
+                  <div
+                    style={{ textAlign: "justify" }}
                     dangerouslySetInnerHTML={{
                       __html: sanitizedInstructorDescription,
                     }}
@@ -386,35 +393,38 @@ const DetailsContent = ({ courseDetails }) => {
                           <h2>Price</h2>
                           <h2>{formatCurrency(courseDetails.basePrice)}</h2>
                         </div>
-                        <div className="row gx-2">
-                          <div className="col-md-6 addHeart">
-                            <button
-                              className="btn btn-wish w-100"
-                              onClick={handleAddToCart}
-                              disabled={cartLoading}
-                            >
-                              {cartLoading
-                                ? "Adding to cart..."
-                                : "Add to cart"}
-                            </button>
-                          </div>
-
-                          <div className="col-md-6 addHeart">
-                            <button
-                              className="btn btn-wish w-100"
-                              onClick={handleAddToWishlist}
-                              disabled={loading}
-                            >
-                              {loading ? "Adding..." : "Add to favorites"}
-                            </button>
-                          </div>
-                        </div>
-                        <Link
-                          to={`/checkout/${courseDetails.id}`}
-                          className="btn btn-enroll w-100"
-                        >
-                          Buy now
-                        </Link>
+                        {!isInstructor && (
+                          <>
+                            <div className="row gx-2">
+                              <div className="col-md-6 addHeart">
+                                <button
+                                  className="btn btn-wish w-100"
+                                  onClick={handleAddToCart}
+                                  disabled={cartLoading}
+                                >
+                                  {cartLoading
+                                    ? "Adding to cart..."
+                                    : "Add to cart"}
+                                </button>
+                              </div>
+                              <div className="col-md-6 addHeart">
+                                <button
+                                  className="btn btn-wish w-100"
+                                  onClick={handleAddToWishlist}
+                                  disabled={loading}
+                                >
+                                  {loading ? "Adding..." : "Add to favorites"}
+                                </button>
+                              </div>
+                              <Link
+                                to={`/checkout/${courseDetails.id}`}
+                                className="btn btn-enroll w-100"
+                              >
+                                Buy now
+                              </Link>
+                            </div>
+                          </>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -429,7 +439,8 @@ const DetailsContent = ({ courseDetails }) => {
                     <ul>
                       <li>
                         <img src={Import} className="me-2" alt="" />{" "}
-                        {courseDetails.duration} {courseDetails.duration === 1 ? "hr" : "hrs"} on-demand
+                        {courseDetails.duration}{" "}
+                        {courseDetails.duration === 1 ? "hr" : "hrs"} on-demand
                         videos
                       </li>
                       <li>
@@ -471,7 +482,10 @@ const DetailsContent = ({ courseDetails }) => {
                       </li>
                       <li>
                         <img src={Timer2} className="me-2" alt="" /> Duration:{" "}
-                        <span>{courseDetails.duration} {courseDetails.duration === 1 ? "hr" : "hrs"}</span>
+                        <span>
+                          {courseDetails.duration}{" "}
+                          {courseDetails.duration === 1 ? "hr" : "hrs"}
+                        </span>
                       </li>
                       <li>
                         <img src={Chapter} className="me-2" alt="" /> Chapters:{" "}
@@ -494,11 +508,7 @@ const DetailsContent = ({ courseDetails }) => {
           </div>
         </div>
       </section>
-      <Popup
-        isOpen={isPopupOpen}
-        title="Course Video"
-        onClose={closePopup}
-      >
+      <Popup isOpen={isPopupOpen} title="Course Video" onClose={closePopup}>
         {videoUrl && <ReactPlayer url={videoUrl} />}
       </Popup>
     </>

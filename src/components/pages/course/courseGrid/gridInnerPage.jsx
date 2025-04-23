@@ -7,6 +7,8 @@ import { Icon1, Icon2, Messages } from "../../../imagepath";
 const GridInnerPage = ({ courses }) => {
   const formatCurrency = useCurrencyFormatter();
   const navigate = useNavigate();
+  const storedInstructorId = localStorage.getItem("instructorId");
+  const isInstructor = storedInstructorId && storedInstructorId !== "null";
 
   const handleChatClick = (instructorId) => {
     const studentId = localStorage.getItem("studentId");
@@ -84,9 +86,11 @@ const GridInnerPage = ({ courses }) => {
                     </div>
                   </div>
                   <div className="all-btn all-category d-flex align-items-center">
-                    <Link to={`/checkout/${course.id}`} className="btn btn-primary">
-                      BUY NOW
-                    </Link>
+                  {!isInstructor && (
+                      <Link to={`/checkout/${course.id}`} className="btn btn-primary">
+                        BUY NOW
+                      </Link>
+                    )}
                   </div>
                 </div>
               </div>

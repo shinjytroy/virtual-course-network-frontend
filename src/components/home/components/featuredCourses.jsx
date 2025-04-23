@@ -5,10 +5,15 @@ import useCurrencyFormatter from "../../../hooks/useCurrencyFormatter";
 import { useGetAllCoursesByStatusQuery } from "../../../redux/slices/course/courseApiSlice";
 const FeaturedCourses = () => {
   const navigate = useNavigate();
-  const { data: courses, error, isLoading } = useGetAllCoursesByStatusQuery({ status: "PUBLISHED" });
+  const {
+    data: courses,
+    error,
+    isLoading,
+  } = useGetAllCoursesByStatusQuery({ status: "PUBLISHED" });
   const formatCurrency = useCurrencyFormatter();
+  const storedInstructorId = localStorage.getItem("instructorId");
+  const isInstructor = storedInstructorId && storedInstructorId !== "null";
 
-  
   const handleChatClick = (instructorId) => {
     const studentId = localStorage.getItem("studentId");
 
@@ -45,7 +50,11 @@ const FeaturedCourses = () => {
         </div>
         <div className="section-text aos" data-aos="fade-up">
           <p className="mb-0">
-          The Featured Courses section of the Virtual Course Network showcases a curated selection of the best and most popular courses available on the platform. These courses cover a wide range of topics and are designed to help learners acquire new skills and advance their knowledge.
+            The Featured Courses section of the Virtual Course Network showcases
+            a curated selection of the best and most popular courses available
+            on the platform. These courses cover a wide range of topics and are
+            designed to help learners acquire new skills and advance their
+            knowledge.
           </p>
         </div>
         <div className="course-feature">
@@ -58,43 +67,53 @@ const FeaturedCourses = () => {
                       <Link to={`/course-details/${course.id}`}>
                         <img
                           className="img-fluid"
-                          style={{ objectFit: 'contain', height: '300px' }}
+                          style={{ objectFit: "contain", height: "300px" }}
                           alt={course.titleCourse}
                           src={course.imageCover || "default-image.jpg"}
                         />
                       </Link>
                       <div className="price">
-                        <h3>
-                          {formatCurrency(course.basePrice)}
-                        </h3>
+                        <h3>{formatCurrency(course.basePrice)}</h3>
                       </div>
                     </div>
                     <div className="product-content">
                       <div className="course-group d-flex">
                         <div className="course-group-img d-flex">
-                          <Link to={`/instructor/${course.instructorId}/instructor-profile`}>
+                          <Link
+                            to={`/instructor/${course.instructorId}/instructor-profile`}
+                          >
                             <img
-                              src={course.instructorPhoto || "default-avatar.jpg"}
+                              src={
+                                course.instructorPhoto || "default-avatar.jpg"
+                              }
                               alt=""
                               className="img-fluid"
                             />
                           </Link>
                           <div className="course-name">
                             <h4>
-                              <Link to={`/instructor/${course.instructorId}/instructor-profile`}>
-                                {course.instructorFirstName} {course.instructorLastName}
+                              <Link
+                                to={`/instructor/${course.instructorId}/instructor-profile`}
+                              >
+                                {course.instructorFirstName}{" "}
+                                {course.instructorLastName}
                               </Link>
                             </h4>
                             <p>Instructor</p>
                           </div>
 
-                          <div className="nav-item ms-2"
-                            onClick={() => handleChatClick(course.instructorId)}>
+                          <div
+                            className="nav-item ms-2"
+                            onClick={() => handleChatClick(course.instructorId)}
+                          >
                             <Link to="/student/student-messages">
-                              <img src={Messages} alt="Messages" style={{ width: "40px", height: "40px" }} />
+                              <img
+                                src={Messages}
+                                alt="Messages"
+                                style={{ width: "40px", height: "40px" }}
+                              />
                             </Link>
                           </div>
-
                         </div>
                         {/* <div className="course-share d-flex align-items-center justify-content-center">
                           <Link to="#">
@@ -116,15 +135,23 @@ const FeaturedCourses = () => {
                           <p>{course.totalLectures}+ Lessons</p>
                         </div>
                         <div className="course-view d-flex align-items-center">
-                          <img src={ Icon2} alt="" />
-                          <p>{course.duration} {course.duration === 1 ? "hr" : "hrs"}</p>
+                          <img src={Icon2} alt="" />
+                          <p>
+                            {course.duration}{" "}
+                            {course.duration === 1 ? "hr" : "hrs"}
+                          </p>
                         </div>
                       </div>
                       <div className="d-flex align-items-center justify-content-between">
                         <div className="all-btn all-category d-flex align-items-center">
-                          <Link to="/checkout" className="btn btn-primary">
-                            BUY NOW
-                          </Link>
+                          {!isInstructor && (
+                            <Link
+                              to={`/checkout/${course.id}`}
+                              className="btn btn-primary"
+                            >
+                              BUY NOW
+                            </Link>
+                          )}
                         </div>
                       </div>
                     </div>
